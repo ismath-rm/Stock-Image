@@ -12,3 +12,5 @@ class Image(models.Model):
 
     class Meta:
         ordering = ['order', '-created_at']
+
+        

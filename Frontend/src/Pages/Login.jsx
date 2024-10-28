@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../Redux/authSlice"; // Ensure this is the correct path to your authSlice
+import { login } from "../Redux/authSlice";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
@@ -13,7 +13,14 @@ const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const authState = useSelector((state) => state.auth); // Get the auth state from the Redux store
+  const authState = useSelector((state) => state.auth);
+
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (authState.access) {
+      navigate("/home", { replace: true });
+    }
+  }, [authState.access, navigate]);
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -23,7 +30,7 @@ const Login = () => {
     const { id, value } = e.target;
 
     if (id === "username") {
-      const alphaRegex = /^[a-zA-Z]+$/; // Only alphabetic characters allowed
+      const alphaRegex = /^[a-zA-Z]+$/;
       setUsername(value.trim());
 
       if (value.trim().length < 4 && value.trim().length > 0) {
@@ -69,16 +76,13 @@ const Login = () => {
 
     const loginData = { username, password };
 
-    // Dispatch the login thunk
     try {
       const resultAction = await dispatch(login(loginData));
 
       if (login.fulfilled.match(resultAction)) {
-        // If login is successful, navigate to user dashboard
         toast.success("Login successful");
-        navigate("/home");
+        navigate("/home", { replace: true }); // Use replace to avoid back navigation
       } else {
-        // If login fails, show error
         toast.error("Invalid username or password");
         setErrors((prevErrors) => ({
           ...prevErrors,

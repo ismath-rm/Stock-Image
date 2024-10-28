@@ -10,6 +10,7 @@ import ForgotPassword from './Pages/ForgotPassword';
 import ResetPassword from './Pages/ResetPassword';
 import Home from './Pages/Home';
 import { store } from './Redux/store';
+import PrivateRoute from './Components/UserPrivateRoute'; // Import your PrivateRoute component
 
 function App() {
   return (
@@ -26,17 +27,25 @@ function App() {
             draggable
             pauseOnHover
             theme="light"
-            transition={Bounce} // Corrected syntax here
+            transition={Bounce}
         />
         
         <Routes>
-          <Route path="/home" element={<Home/>}/>
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot_password" element={<ForgotPassword />} />
           <Route path="/auth/resetpassword/:uidb64/:token" element={<ResetPassword />} />
+          
+          {/* Protect the /home route with PrivateRoute */}
+          <Route 
+            path="/home" 
+            element={
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
+            } 
+          />
         </Routes>
-      
       </Router>
     </Provider>
   );
