@@ -90,7 +90,7 @@ const ImageUpload = () => {
       {files.length > 0 && (
         <button
           type="submit"
-          className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="w-full py-2 px-4 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white font-bold rounded-lg"
         >
           Upload {files.length} {files.length === 1 ? 'Image' : 'Images'}
         </button>
