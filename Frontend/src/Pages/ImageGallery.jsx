@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { DndContext, closestCenter,KeyboardSensor,PointerSensor,useSensor,useSensors,} from '@dnd-kit/core';
-import {arrayMove,SortableContext,sortableKeyboardCoordinates,useSortable,} from '@dnd-kit/sortable';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Edit2, Trash2, GripVertical } from 'lucide-react';
 import { fetchImages, updateImageOrder, updateImage, deleteImage } from '../Redux/imageSlice';
@@ -11,13 +11,7 @@ import { DeleteConfirmationModal } from '../Components/DeleteConfirmationModal';
 import EmptyGallery from '../Components/EmptyGallery';
 
 const SortableItem = ({ id, image, onEdit, onDelete }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id: id });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -31,7 +25,7 @@ const SortableItem = ({ id, image, onEdit, onDelete }) => {
       </div>
       <img src={image.image} alt={image.title} className="w-full h-48 object-cover rounded-lg" />
       <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-        <button onClick={() => onEdit(image)} className="mr-2 p-2 bg-blue-500 rounded-full">
+        <button onClick={() => onEdit(image)} className="mr-2 p-2 bg-black rounded-full">
           <Edit2 size={20} color="white" />
         </button>
         <button onClick={() => onDelete(image)} className="p-2 bg-red-500 rounded-full">
@@ -43,30 +37,27 @@ const SortableItem = ({ id, image, onEdit, onDelete }) => {
   );
 };
 
-
 const ImageGallery = () => {
-    const dispatch = useDispatch();
-    const { images, status, error } = useSelector((state) => state.images);
-    const [items, setItems] = useState([]);
-    const [editingImage, setEditingImage] = useState(null);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isDeletingImage, setIsDeletingImage] = useState(null);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  
-    const sensors = useSensors(
-      useSensor(PointerSensor),
-      useSensor(KeyboardSensor, {
-        coordinateGetter: sortableKeyboardCoordinates,
-      })
-    );
-  
-    useEffect(() => {
-      dispatch(fetchImages());
-    }, [dispatch]);
-  
-    useEffect(() => {
-      setItems(images);
-    }, [images]);
+  const dispatch = useDispatch();
+  const { images, status, error } = useSelector((state) => state.images);
+  const [items, setItems] = useState([]);
+  const [editingImage, setEditingImage] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeletingImage, setIsDeletingImage] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor)
+  );
+
+  useEffect(() => {
+    dispatch(fetchImages());
+  }, [dispatch]);
+
+  useEffect(() => {
+    setItems(images);
+  }, [images]);
 
   const handleDragEnd = useCallback((event) => {
     const { active, over } = event;
@@ -90,11 +81,24 @@ const ImageGallery = () => {
 
   const handleSaveEdit = useCallback(({ title, newImage }) => {
     if (editingImage) {
+      const updatedImage = {
+        ...editingImage,
+        title,
+        image: newImage ? URL.createObjectURL(newImage) : editingImage.image, // Use new image or keep the existing one
+      };
+
+      // Update the items state immediately
+      setItems((prevItems) =>
+        prevItems.map((img) => (img.id === editingImage.id ? updatedImage : img))
+      );
+
+      // Dispatch the update to the backend
       const formData = new FormData();
       formData.append('title', title);
       if (newImage) {
         formData.append('image', newImage);
       }
+
       dispatch(updateImage({ id: editingImage.id, formData }))
         .unwrap()
         .then(() => {
@@ -103,6 +107,8 @@ const ImageGallery = () => {
         .catch(() => {
           toast.error('Failed to update image');
         });
+
+      setIsEditModalOpen(false); // Close the modal after saving
     }
   }, [editingImage, dispatch]);
 

@@ -31,6 +31,8 @@ export const resetPassword = createAsyncThunk(
 );
 
 
+
+
 export const login = createAsyncThunk(
     'auth/login',
     async (userData, thunkAPI) => {
@@ -39,12 +41,18 @@ export const login = createAsyncThunk(
             const response = await axiosInstance.post('auth/login/', userData);
             console.log('Login response:', response.data);
 
+            // Assuming the response data directly contains user information
+            const { refresh, access, username, email, id, is_authenticated, message } = response.data;
+
             // Store tokens and user info if successful
-            localStorage.setItem('refresh', response.data.refresh); // Consistent token key
-            localStorage.setItem('access', response.data.access);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            
-            return response.data; 
+            localStorage.setItem('refresh', refresh);
+            localStorage.setItem('access', access);
+            localStorage.setItem('user', JSON.stringify({ username, email, id, is_authenticated }));
+
+            console.log('Logged in user:', { username, email, id, is_authenticated });
+
+            // Return the full response or just the relevant data
+            return response.data; // Or return { username, email, id, is_authenticated } if you want to simplify it
         } catch (error) {
             console.error("Error response data:", error.response?.data || error.message); // Log detailed error info
             return thunkAPI.rejectWithValue(error.response?.data || 'Login failed');
@@ -147,12 +155,20 @@ const authSlice = createSlice({
           .addCase(signup.pending, (state) => {
             state.isLoading = true;
         })
+    
+
         .addCase(signup.fulfilled, (state, action) => {
             state.isLoading = false;
+            // Ensure action.payload has user and access
             state.user = action.payload.user;
-            // state.token = action.payload.token;
             state.access = action.payload.access;
             state.error = null; 
+        })
+
+        .addCase(signup.rejected, (state, action) => {
+            state.isLoading = false;
+            // Use a more informative error message if available
+            state.error = action.payload?.error || 'Signup failed. Please try again.';
         })
           .addCase(checkAuthStatus.pending, (state) => {
             state.isLoading = true;

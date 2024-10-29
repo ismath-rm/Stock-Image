@@ -170,8 +170,8 @@ const Signup = () => {
 
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white font-bold rounded-lg"
-            disabled={isLoading || errors.username || errors.email || errors.password || errors.phoneNumber} // Disable if loading or validation errors exist
+            className="w-full py-2 px-4 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white font-bold rounded-lg hover:bg-gradient-to-l focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+            disabled={ errors.username || errors.email || errors.password || errors.phoneNumber || isLoading } // Disable if loading or validation errors exist
           >
             {isLoading ? "Signing Up..." : "Sign Up"}
           </button>
