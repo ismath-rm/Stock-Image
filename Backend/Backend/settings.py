@@ -143,6 +143,10 @@ CORS_ALLOWED_ORIGINS = [
     'https://main.d2hnfvm9nrxrv0.amplifyapp.com',
     'http://localhost:5173',
 ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://main.d2hnfvm9nrxrv0.amplifyapp.com',
+    'http://localhost:5173',
+]
 
 
 REST_FRAMEWORK = {
